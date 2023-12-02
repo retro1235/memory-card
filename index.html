@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazing Memory Card Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #222;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #game-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 600px;
+        }
+
+        .card {
+            width: 100px;
+            height: 150px;
+            margin: 10px;
+            background-color: #222;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .card.flip {
+            transform: rotateY(180deg);
+        }
+
+        .card .face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            background: #3498db;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card .back {
+            transform: rotateY(180deg);
+            background: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <script>
+        const symbols = ['🍎', '🍌', '🍒', '🍇', '🍓', '🍍', '🥑', '🍋', '🍊', '🍉', '🍈', '🍑'];
+        let selectedCards = [];
+        let pairsFound = 0;
+
+        function createCard(symbol, index) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.symbol = symbol;
+            card.dataset.index = index;
+
+            const front = document.createElement('div');
+            front.classList.add('face');
+            front.textContent = '🔄';
+
+            const back = document.createElement('div');
+            back.classList.add('face', 'back');
+            back.textContent = symbol;
+
+            card.appendChild(front);
+            card.appendChild(back);
+
+            card.addEventListener('click', () => handleCardClick(card));
+
+            return card;
+        }
+
+        function handleCardClick(card) {
+            if (!card.classList.contains('flip') && selectedCards.length < 2) {
+                card.classList.add('flip');
+                selectedCards.push(card);
+
+                if (selectedCards.length === 2) {
+                    setTimeout(checkMatch, 1000);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = selectedCards;
+
+            if (card1.dataset.symbol === card2.dataset.symbol) {
+                pairsFound++;
+                if (pairsFound === symbols.length) {
+                    setTimeout(() => alert('Congratulations! You matched all pairs!'), 500);
+                }
+            } else {
+                document.getElementById('game-container').style.pointerEvents = 'none';
+
+                setTimeout(() => {
+                    card1.classList.remove('flip');
+                    card2.classList.remove('flip');
+                    
+                    document.getElementById('game-container').style.pointerEvents = 'auto';
+                }, 500);
+            }
+
+            selectedCards = [];
+        }
+
+        function shuffleArray(array) {
+            return array.slice().sort(() => Math.random() - 0.5);
+        }
+
+        function initializeGame() {
+            const gameContainer = document.getElementById('game-container');
+
+            // Duplicate the symbols array to create pairs
+            const symbolPairs = symbols.concat(symbols);
+
+            // Shuffle the combined array to randomize the pairs
+            const shuffledPairs = shuffleArray(symbolPairs);
+
+            shuffledPairs.forEach((symbol, index) => {
+                const card = createCard(symbol, index);
+                gameContainer.appendChild(card);
+            });
+        }
+
+        initializeGame();
+    </script>
+</body>
+</html>
